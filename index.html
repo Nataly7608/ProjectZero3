@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeCoding — Создавай сайты с ИИ без кода</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --purple: #8b5cf6;
+      --blue: #3b82f6;
+      --turquoise: #06b6d4;
+      --pink: #ec4899;
+      --mint: #34d399;
+      --bg: #0a0a12;
+      --card-bg: rgba(255,255,255,0.04);
+      --text: #e2e8f0;
+      --text-secondary: #94a3b8;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient background */
+    .gradient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(800px circle at 20% 30%, rgba(139,92,246,0.12) 0%, transparent 70%),
+        radial-gradient(800px circle at 80% 70%, rgba(6,182,212,0.10) 0%, transparent 70%),
+        radial-gradient(600px circle at 50% 50%, rgba(236,72,153,0.06) 0%, transparent 70%);
+      animation: gradientShift 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes gradientShift {
+      0% { transform: scale(1) rotate(0deg); }
+      33% { transform: scale(1.1) rotate(1deg); }
+      66% { transform: scale(0.95) rotate(-1deg); }
+      100% { transform: scale(1.05) rotate(0.5deg); }
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      animation: orbFloat 25s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(139,92,246,0.10);
+      top: -100px; left: -100px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(6,182,212,0.08);
+      bottom: -100px; right: -100px;
+      animation-delay: -8s;
+    }
+    .orb-3 {
+      width: 350px; height: 350px;
+      background: rgba(236,72,153,0.06);
+      top: 50%; left: 50%;
+      animation-delay: -16s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(100px, -80px) scale(1.2); }
+      50% { transform: translate(-60px, 60px) scale(0.8); }
+      75% { transform: translate(80px, 40px) scale(1.1); }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 4px; }
+
+    /* Utility */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      max-width: 600px;
+      margin: 0 auto 60px;
+    }
+
+    section {
+      padding: 100px 0;
+      position: relative;
+    }
+
+    /* Reveal animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(10,10,18,0.85);
+      backdrop-filter: blur(20px);
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--turquoise));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--turquoise));
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .nav-cta:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(139,92,246,0.4);
+    }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .burger span {
+      width: 28px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+    .burger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .burger.active span:nth-child(2) { opacity: 0; }
+    .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 80px;
+      position: relative;
+    }
+    .hero .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.25);
+      color: var(--purple);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .hero-badge span { color: var(--turquoise); }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--purple), var(--turquoise), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 36px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px rgba(139,92,246,0.4), 0 0 80px rgba(236,72,153,0.2);
+    }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary span { position: relative; z-index: 1; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--purple);
+    }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-code-block {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .hero-code-block .dots {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .hero-code-block .dots span {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .hero-code-block .dots span:nth-child(1) { background: #ff5f56; }
+    .hero-code-block .dots span:nth-child(2) { background: #ffbd2e; }
+    .hero-code-block .dots span:nth-child(3) { background: #27c93f; }
+    .hero-code-block pre {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .hero-code-block pre .kw { color: var(--purple); }
+    .hero-code-block pre .fn { color: var(--turquoise); }
+    .hero-code-block pre .str { color: var(--mint); }
+    .hero-code-block pre .cm { color: #64748b; font-style: italic; }
+    .hero-code-block pre .num { color: var(--pink); }
+
+    .hero-glow {
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(139,92,246,0.15), transparent);
+      border-radius: 50%;
+      z-index: -1;
+      animation: glowPulse 4s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* Stats */
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .hero-stats .stat h3 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--turquoise), var(--mint));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-stats .stat p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    /* ===== TARGET AUDIENCE ===== */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .audience-card {
+      padding: 40px 32px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 0.4s, border-color 0.4s, box-shadow 0.4s;
+      text-align: center;
+    }
+    .audience-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(139,92,246,0.3);
+      box-shadow: 0 20px 60px rgba(139,92,246,0.1);
+    }
+    .audience-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      width: 64px; height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      margin: 0 auto 20px;
+      background: rgba(139,92,246,0.1);
+    }
+    .audience-card:nth-child(2) .icon { background: rgba(6,182,212,0.1); }
+    .audience-card:nth-child(3) .icon { background: rgba(236,72,153,0.1); }
+    .audience-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .audience-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ===== WHAT YOU LEARN ===== */
+    .learn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .learn-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px;
+      border-radius: 14px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.3s, border-color 0.3s, transform 0.3s;
+    }
+    .learn-item:hover {
+      background: rgba(139,92,246,0.06);
+      border-color: rgba(139,92,246,0.15);
+      transform: translateX(6px);
+    }
+    .learn-item .check {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--turquoise), var(--mint));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .learn-item h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .learn-item p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ===== COURSE PROGRAM ===== */
+    .program-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .program-item {
+      border-radius: 16px;
+      margin-bottom: 16px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .program-item:hover { border-color: rgba(139,92,246,0.2); }
+    .program-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px;
+      cursor: pointer;
+      user-select: none;
+      gap: 16px;
+    }
+    .program-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .program-header .num {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--turquoise));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .program-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .program-header .arrow {
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+      color: var(--text-secondary);
+    }
+    .program-item.open .arrow { transform: rotate(180deg); }
+    .program-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+      padding: 0 28px;
+    }
+    .program-item.open .program-body {
+      max-height: 400px;
+      padding: 0 28px 24px;
+    }
+    .program-body p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+    .program-body ul {
+      list-style: none;
+      margin-top: 12px;
+    }
+    .program-body ul li {
+      padding: 6px 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .program-body ul li::before {
+      content: '→ ';
+      color: var(--turquoise);
+    }
+
+    /* ===== PRICING ===== */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .pricing-card {
+      padding: 40px 32px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+      transition: transform 0.4s, border-color 0.4s, box-shadow 0.4s;
+      position: relative;
+    }
+    .pricing-card.featured {
+      border-color: rgba(139,92,246,0.3);
+      background: rgba(139,92,246,0.06);
+      transform: scale(1.02);
+    }
+    .pricing-card.featured::before {
+      content: 'Самый популярный';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 16px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(139,92,246,0.3);
+      box-shadow: 0 20px 60px rgba(139,92,246,0.1);
+    }
+    .pricing-card.featured:hover { transform: scale(1.02) translateY(-8px); }
+    .pricing-card .plan-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    .pricing-card .price {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+    .pricing-card .price span {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+    .pricing-card .price-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .pricing-card .features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .pricing-card .features li {
+      padding: 10px 0;
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .pricing-card .features li:last-child { border: none; }
+    .pricing-card .features li::before {
+      content: '✓ ';
+      color: var(--mint);
+      font-weight: 700;
+    }
+
+    /* ===== FAQ ===== */
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      padding: 24px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .faq-item:last-child { border: none; }
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      gap: 16px;
+    }
+    .faq-question h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .faq-question .arrow {
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+      color: var(--text-secondary);
+    }
+    .faq-item.open .arrow { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding-top: 14px;
+    }
+    .faq-answer p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      text-align: center;
+      padding: 80px 0;
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .cta-section p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto 36px;
+    }
+    .cta-section .btn-primary {
+      font-size: 1.15rem;
+      padding: 18px 48px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+    }
+    footer p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    footer .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    footer .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    footer .footer-links a:hover { color: var(--turquoise); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .hero .container {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero p { margin: 0 auto 36px; }
+      .hero-actions { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-code-block { margin: 0 auto; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .pricing-card.featured { transform: none; }
+      .pricing-card.featured:hover { transform: translateY(-8px); }
+    }
+
+    @media (max-width: 768px) {
+      section { padding: 60px 0; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0; right: 0;
+        background: rgba(10,10,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 24px;
+        gap: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .burger { display: flex; }
+      .audience-grid { grid-template-columns: 1fr; }
+      .learn-grid { grid-template-columns: 1fr; }
+      .pricing-grid { max-width: 360px; }
+      .hero-stats { flex-direction: column; gap: 20px; align-items: center; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .hero h1 { font-size: 2rem; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .hero-code-block { padding: 16px; }
+      .hero-code-block pre { font-size: 0.7rem; }
+      .program-header { padding: 16px 20px; }
+      .program-body { padding: 0 20px; }
+      .program-item.open .program-body { padding: 0 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="gradient-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="container">
+    <div class="logo">VibeCoding</div>
+    <div class="nav-links" id="navLinks">
+      <a href="#audience">Кому подойдёт</a>
+      <a href="#learn">Чему научитесь</a>
+      <a href="#program">Программа</a>
+      <a href="#pricing">Тарифы</a>
+      <a href="#cta" class="nav-cta">Записаться</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-content reveal visible">
+      <div class="hero-badge">⚡ Освой за <span>2 недели</span></div>
+      <h1>
+        Создавай сайты и сервисы<br>
+        <span class="gradient-text">с помощью ИИ</span>
+      </h1>
+      <p>
+        Курс по вайб-кодингу для тех, кто никогда не писал код.
+        Научим тебя делать работающие проекты через ChatGPT, Claude и другие ИИ-инструменты.
+        Без скучной теории — только практика и результат.
+      </p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary"><span>Начать учиться →</span></a>
+        <a href="#program" class="btn-secondary">Программа курса</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <h3>2 недели</h3>
+          <p>интенсивного обучения</p>
+        </div>
+        <div class="stat">
+          <h3>6 модулей</h3>
+          <p>от основ до профита</p>
+        </div>
+        <div class="stat">
+          <h3>0 строк</h3>
+          <p>кода для старта не нужно</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual reveal visible reveal-delay-2">
+      <div class="hero-glow"></div>
+      <div class="hero-code-block">
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <pre>
+<span class="cm">// Твой первый сайт за 5 минут</span>
+<span class="kw">const</span> idea = <span class="str">"Лендинг для стартапа"</span>;
+
+<span class="kw">const</span> site = <span class="kw">await</span> <span class="fn">generateWithAI</span>({
+  prompt: idea,
+  style: <span class="str">"modern, dark, gradient"</span>
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(site); <span class="cm">// ✅ готово!</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TARGET AUDIENCE -->
+<section id="audience">
+  <div class="container">
+    <h2 class="section-title reveal">Кому нужен этот курс</h2>
+    <p class="section-subtitle reveal">
+      Независимо от твоего опыта — ты сможешь создавать проекты, которые работают и приносят результат
+    </p>
+    <div class="audience-grid">
+      <div class="audience-card reveal reveal-delay-1">
+        <div class="icon">🚀</div>
+        <h3>Новичкам</h3>
+        <p>Никогда не писал код? Не проблема. Начнём с нуля и за 2 недели ты сделаешь свой первый работающий проект. Без занудной теории и терминов.</p>
+      </div>
+      <div class="audience-card reveal reveal-delay-2">
+        <div class="icon">🎨</div>
+        <h3>Дизайнерам и маркетологам</h3>
+        <p>Перестань зависеть от разработчиков. Воплощай свои идеи сам: лендинги, прототипы, лендинги под лиды — всё, что нужно для работы.</p>
+      </div>
+      <div class="audience-card reveal reveal-delay-3">
+        <div class="icon">⚡</div>
+        <h3>Создателям проектов</h3>
+        <p>У тебя есть идея? ИИ поможет её реализовать. Пет-проекты, MVP, автоматизации, мини-сервисы — без найма команды и больших вложений.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT YOU LEARN -->
+<section id="learn">
+  <div class="container">
+    <h2 class="section-title reveal">Чему ты научишься</h2>
+    <p class="section-subtitle reveal">
+      На выходе ты будешь не просто «знать теорию», а уметь делать реальные штуки
+    </p>
+    <div class="learn-grid">
+      <div class="learn-item reveal">
+        <div class="check">✓</div>
+        <div>
+          <h4>Формулировать промты</h4>
+          <p>Правильно общаться с ИИ, чтобы получать код, который работает с первого раза</p>
+        </div>
+      </div>
+      <div class="learn-item reveal reveal-delay-1">
+        <div class="check">✓</div>
+        <div>
+          <h4>Собирать лендинги за часы</h4>
+          <p>Красивые, адаптивные, конверсионные страницы — без единой строки ручного кода</p>
+        </div>
+      </div>
+      <div class="learn-item reveal reveal-delay-2">
+        <div class="check">✓</div>
+        <div>
+          <h4>Работать с API и сервисами</h4>
+          <p>Подключать Telegram-ботов, формы, платежи — всё, что нужно для живого проекта</p>
+        </div>
+      </div>
+      <div class="learn-item reveal reveal-delay-3">
+        <div class="check">✓</div>
+        <div>
+          <h4>Деплоить проекты в интернет</h4>
+          <p>Публиковать сайты и сервисы, которыми можно делиться и которые приносят пользу</p>
+        </div>
+      </div>
+      <div class="learn-item reveal">
+        <div class="check">✓</div>
+        <div>
+          <h4>Отлаживать и чинить код</h4>
+          <p>Понимать, почему что-то не работает, и фиксить это с помощью ИИ за пару минут</p>
+        </div>
+      </div>
+      <div class="learn-item reveal reveal-delay-1">
+        <div class="check">✓</div>
+        <div>
+          <h4>Мыслить как разработчик</h4>
+          <p>Структурировать идеи, разбивать задачи и создавать сложные штуки без боли</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COURSE PROGRAM -->
+<section id="program">
+  <div class="container">
+    <h2 class="section-title reveal">Программа курса</h2>
+    <p class="section-subtitle reveal">
+      6 модулей — от первой команды ИИ до готового проекта в интернете
+    </p>
+    <div class="program-list">
+      <div class="program-item open reveal">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">1</div>
+            <h3>Знакомство с вайб-кодингом</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Что такое вайб-кодинг, как выбирать ИИ-инструменты, как ставить задачу, чтобы получить результат. Первый рабочий код через 15 минут.</p>
+          <ul>
+            <li>Обзор ChatGPT, Claude, Cursor — что и когда использовать</li>
+            <li>Главные правила промтинга для кода</li>
+            <li>Твой первый сайт — уже на первом уроке</li>
+          </ul>
+        </div>
+      </div>
+      <div class="program-item reveal reveal-delay-1">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">2</div>
+            <h3>Вёрстка и стили</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Создаём красивые страницы: сетки, адаптив, анимации, тёмные темы. ИИ напишет CSS, а ты будешь управлять стилем через промты.</p>
+          <ul>
+            <li>Flexbox и Grid без боли</li>
+            <li>Адаптив под мобильные</li>
+            <li>Анимации и эффекты через промты</li>
+          </ul>
+        </div>
+      </div>
+      <div class="program-item reveal reveal-delay-2">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">3</div>
+            <h3>Интерактив и логика</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Добавляем жизнь на страницы: формы, калькуляторы, табы, слайдеры. ИИ пишет JavaScript, ты контролируешь логику.</p>
+          <ul>
+            <li>Обработка событий и работа с DOM</li>
+            <li>Формы, валидация, отправка данных</li>
+            <li>Готовые интерактивные компоненты</li>
+          </ul>
+        </div>
+      </div>
+      <div class="program-item reveal">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">4</div>
+            <h3>Работа с данными и API</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Подключаем внешние сервисы: Telegram, почта, базы данных. Твой сайт перестаёт быть статичным и начинает работать по-настоящему.</p>
+          <ul>
+            <li>HTTP-запросы через ИИ-промты</li>
+            <li>Telegram-боты и уведомления</li>
+            <li>Хранение данных и авторизация</li>
+          </ul>
+        </div>
+      </div>
+      <div class="program-item reveal reveal-delay-1">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">5</div>
+            <h3>Деплой и публикация</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Публикуем проект в интернет. Настраиваем домен, хостинг, HTTPS. Твой сайт доступен миру — делимся ссылкой с кем угодно.</p>
+          <ul>
+            <li>Vercel, Netlify, GitHub Pages</li>
+            <li>Свой домен за 5 минут</li>
+            <li>Автоматический деплой при изменениях</li>
+          </ul>
+        </div>
+      </div>
+      <div class="program-item reveal reveal-delay-2">
+        <div class="program-header" onclick="toggleProgram(this)">
+          <div class="program-header-left">
+            <div class="num">6</div>
+            <h3>Финальный проект</h3>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="program-body">
+          <p>Собираем всё вместе. Ты выбираешь идею, мы помогаем её реализовать. На выходе — готовый проект в портфолио и полное понимание процесса.</p>
+          <ul>
+            <li>Выбор и утверждение идеи</li>
+            <li>Поэтапная разработка с ментором</li>
+            <li>Презентация и запуск проекта</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <h2 class="section-title reveal">Выбери свой тариф</h2>
+    <p class="section-subtitle reveal">
+      Стартуй сегодня — плати только за результат
+    </p>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="plan-name">Базовый</div>
+        <div class="price">3 900 ₽</div>
+        <div class="price-desc">или 1 500 ₽/мес</div>
+        <ul class="features">
+          <li>Все 6 модулей курса</li>
+          <li>Доступ навсегда</li>
+          <li>Чат сообщества</li>
+          <li>Обновления контента</li>
+        </ul>
+        <a href="#cta" class="btn-primary" style="font-size: 0.9rem; padding: 14px 32px;"><span>Выбрать</span></a>
+      </div>
+      <div class="pricing-card featured reveal reveal-delay-1">
+        <div class="plan-name">Стандарт</div>
+        <div class="price">6 900 ₽</div>
+        <div class="price-desc">или 2 500 ₽/мес</div>
+        <ul class="features">
+          <li>Всё из Базового</li>
+          <li>Разбор реальных проектов</li>
+          <li>Доп. модуль по монетизации</li>
+          <li>Шаблоны и заготовки кода</li>
+          <li>Чат с автором курса</li>
+        </ul>
+        <a href="#cta" class="btn-primary" style="font-size: 0.9rem; padding: 14px 32px;"><span>Выбрать</span></a>
+      </div>
+      <div class="pricing-card reveal reveal-delay-2">
+        <div class="plan-name">VIP</div>
+        <div class="price">14 900 ₽</div>
+        <div class="price-desc">или 5 000 ₽/мес</div>
+        <ul class="features">
+          <li>Всё из Стандарта</li>
+          <li>Индивидуальные созвоны с ментором</li>
+          <li>Ревью твоего проекта</li>
+          <li>Помощь с твоей идеей</li>
+          <li>Сертификат о прохождении</li>
+        </ul>
+        <a href="#cta" class="btn-primary" style="font-size: 0.9rem; padding: 14px 32px;"><span>Выбрать</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <h2 class="section-title reveal">Частые вопросы</h2>
+    <p class="section-subtitle reveal">Всё, что ты хотел спросить, но стеснялся</p>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Мне реально не нужно знать код?</h4>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="faq-answer"><p>Абсолютно. Весь курс построен так, чтобы ты работал через ИИ. Ты будешь понимать, что происходит, но писать код руками не придётся. Достаточно уметь формулировать, что ты хочешь получить.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Сколько времени нужно уделять в день?</h4>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="faq-answer"><p>30–60 минут в день. Курс спроектирован так, чтобы ты проходил модули в комфортном темпе. Можно быстрее — всё зависит от твоего желания.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Какой проект я сделаю в итоге?</h4>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="faq-answer"><p>Ты сам выбираешь. Лендинг, интернет-магазин, Telegram-бот, дашборд — что угодно. Мы помогаем с выбором и реализацией. Главное — это будет твой работающий проект.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>А если у меня не получится?</h4>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="faq-answer"><p>Получится. Мы рядом на каждом этапе. Чат, обратная связь, созвоны на VIP-тарифе. Если что-то пойдёт не так — поможем разобраться. Ты не один.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Можно вернуть деньги?</h4>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="faq-answer"><p>Да, мы даём гарантию 7 дней. Если поймёшь, что это не твоё — вернём деньги без вопросов. Но мы уверены, что тебе понравится.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="cta-section">
+  <div class="container reveal">
+    <h2>Готов начать?</h2>
+    <p>Перестань откладывать. За 2 недели ты сделаешь проект, который сейчас кажется невозможным.</p>
+    <a href="#" class="btn-primary" onclick="alert('Спасибо за интерес! В реальном проекте здесь была бы форма оплаты. А пока — напиши нам в Telegram: @vibecoding'); return false;">
+      <span>Записаться на курс →</span>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="logo" style="font-size: 1.2rem; margin-bottom: 8px;">VibeCoding</div>
+    <p>Создавай с ИИ — без кода и головной боли.</p>
+    <div class="footer-links">
+      <a href="#">Telegram</a>
+      <a href="#">YouTube</a>
+      <a href="#">Instagram</a>
+      <a href="mailto:hello@vibecoding.ru">hello@vibecoding.ru</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Navbar scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Burger menu
+  document.getElementById('burger').addEventListener('click', () => {
+    document.getElementById('burger').classList.toggle('active');
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // Close menu on link click
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('burger').classList.remove('active');
+      document.getElementById('navLinks').classList.remove('open');
+    });
+  });
+
+  // Reveal on scroll
+  function revealOnScroll() {
+    const reveals = document.querySelectorAll('.reveal:not(.visible)');
+    const windowHeight = window.innerHeight;
+    const revealPoint = 120;
+
+    reveals.forEach(el => {
+      const top = el.getBoundingClientRect().top;
+      if (top < windowHeight - revealPoint) {
+        el.classList.add('visible');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', revealOnScroll);
+  window.addEventListener('load', () => {
+    revealOnScroll();
+    // small delay to catch any remaining
+    setTimeout(revealOnScroll, 300);
+  });
+
+  // Toggle program accordion
+  function toggleProgram(header) {
+    const item = header.closest('.program-item');
+    const wasOpen = item.classList.contains('open');
+    // close all others
+    document.querySelectorAll('.program-item.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  // Toggle FAQ
+  function toggleFaq(question) {
+    const item = question.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+
+  // Smooth parallax on orb
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    document.querySelectorAll('.orb').forEach((orb, i) => {
+      const factor = (i + 1) * 0.3;
+      orb.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+    });
+  });
+</script>
+</body>
+</html>
